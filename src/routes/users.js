@@ -94,4 +94,19 @@ router.patch("/update/:id", userValidation, function (req, res) {
   }
 });
 
+router.delete("/delete/:id", function (req, res) {
+  let id = req.params.id;
+
+  try {
+    const query = db.prepare(`DELETE FROM users WHERE id = ?`).run(id);
+
+    return res.json({
+      status: 200,
+      message: "Users berhasil dihapus!",
+    });
+  } catch (e) {
+    console.error(`Error deleting users: ${e}`);
+  }
+});
+
 module.exports = router;
