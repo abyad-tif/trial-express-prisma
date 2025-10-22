@@ -5,23 +5,6 @@ const { body, validationResult } = require("express-validator");
 
 const db = require("../connection/database");
 
-// Fungsi Menampilkan Semua Data - Sqlite3
-// router.get("/", function (req, res) {
-//   db.all("SELECT * FROM users", (err, rows) => {
-//     if (err) {
-//       return res.status(500).json({
-//         message: err.message,
-//       });
-//     } else {
-//       return res.status(200).json({
-//         status: true,
-//         message: "List Data Users!",
-//         data: db,
-//       });
-//     }
-//   });
-// });
-
 // Fungsi Menampilkan Data - BetterSqlite3
 router.get("/", function (req, res) {
   try {
@@ -64,56 +47,51 @@ router.post("/store", userValidation, function (req, res) {
   }
 });
 
-// Fungsi Memasukkan Data
-// router.post("/store", userValidation, (req, res) => {
-//   const error = validationResult(req);
-//   if (!error.isEmpty()) {
-//     return res.status(422).json({
-//       errors: error.array(),
-//     });
-//   }
+// Fungsi Detail Data - Bettersqlite3
+router.get("/:id", function (req, res) {
+  const id = req.params.id;
 
-//   // const { email, username, name } = req.body;
+  const query = db.prepare(`SELECT * FROM users WHERE id = ${id}`).all();
 
-//   // try {
-//   //   return res.status(200).json({
-//   //     email: email,
-//   //     username: username,
-//   //     name: name,
-//   //   });
-//   // } catch (e) {
-//   //   console.error(`Error: ${e}`);
-//   // }
+  if (query.length <= 0) {
+    return res.json({
+      status: 404,
+      message: "Data User tak ditemukan.",
+    });
+  } else {
+    return res.json({
+      status: 200,
+      message: `Data Dari ${id}`,
+      data: query,
+    });
+  }
+});
 
-//   const body = req.body;
+// Fungsi Update Berdasarkan ID - BetterSqlite3
+router.patch("/update/:id", userValidation, function (req, res) {
+  const error = validationResult(req);
+  if (!error.isEmpty()) {
+    return res.status(422).json({
+      errors: error.array(),
+    });
+  }
 
-//   let formData = {
-//     email: body.email,
-//     name: body.name,
-//   };
+  let id = req.params.id;
 
-//   // return res.json(formData);
+  try {
+    const query = db.prepare(
+      `UPDATE users SET email = ?, name = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ${id}`
+    );
 
-//   // let formData = {
-//   //   email: userValidationRules.body.email,
-//   //   username: userValidationRules.body.username,
-//   //   name: userValidationRules.body.name,
-//   // };
+    query.run(req.body.email, req.body.name);
 
-//   db.run(`INSERT INTO users VALUE ?`, formData, function (err, rows) {
-//     if (err) {
-//       return res.status(500).json({
-//         status: false,
-//         message: "Internal Server Error",
-//       });
-//     } else {
-//       return res.status(201).json({
-//         status: true,
-//         message: "Insert Data Successfully",
-//         data: rows[0],
-//       });
-//     }
-//   });
-// });
+    return res.json({
+      status: 201,
+      message: "Data berhasil diubah",
+    });
+  } catch (e) {
+    console.error(`Error updating data: ${e}`);
+  }
+});
 
 module.exports = router;
