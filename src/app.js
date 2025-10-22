@@ -4,14 +4,14 @@ const app = express();
 const router = express.Router();
 const PORT = 3000;
 
-app.use(express.json());
-
 app.get("/", (req, res) => {
   res.json({
     message: "Express + Prisma + Sqlite",
   });
 });
 
+app.use(express.json());
+app.use(express.urlencoded());
 app.use("/api/users", usersRouter);
 
 app.listen(PORT, () => {
