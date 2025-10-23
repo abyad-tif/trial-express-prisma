@@ -1,6 +1,6 @@
 const express = require("express");
 const usersRouter = require("./routes/users");
-const userProfileRouter = require("./routes/profile");
+const userProfileRouter = require("./routes/alumni");
 const verifyToken = require("./middleware/token");
 const app = express();
 const router = express.Router();
@@ -15,8 +15,8 @@ app.get("/", (req, res) => {
 app.use(express.json());
 app.use(express.urlencoded());
 // app.use(verifyToken);
-app.use("/api/getUsers", usersRouter);
-app.use("/api/getUserProfile", userProfileRouter);
+app.use("/api/getDataUsers", usersRouter);
+app.use("/api/getDataAlumni", userProfileRouter);
 
 app.listen(PORT, () => {
   console.log(`Server berjalan di port ${PORT}`);

@@ -61,12 +61,6 @@ router.post("/login", async function (req, res) {
       .prepare(`SELECT * FROM users WHERE email = (?)`)
       .get(req.body.email);
 
-    // if (user) {
-    //   return res.json({
-    //     data: user.email,
-    //   });
-    // }
-
     if (!user) {
       return res.json({
         status: 401,
@@ -100,6 +94,23 @@ router.post("/login", async function (req, res) {
     console.error(`Error: ${e}`);
   }
 });
+
+// router.post("/logout", function (req, res) {
+//   req.session.destroy((err) => {
+//     if (err) {
+//       console.error(`Error: `, err);
+//       return res.json({
+//         status: 500,
+//         message: "Internal Server Error",
+//       });
+//     } else {
+//       return res.json({
+//         status: 200,
+//         message: "Logged Out Successfully",
+//       });
+//     }
+//   });
+// });
 
 // Fungsi Detail Data - Bettersqlite3
 router.get("/:id", function (req, res) {
