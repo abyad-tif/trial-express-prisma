@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const { body, validationResult } = require("express-validator");
 
@@ -8,7 +10,7 @@ const db = require("../connection/database");
 // Fungsi Menampilkan Data - BetterSqlite3
 router.get("/", function (req, res) {
   try {
-    const query = db.prepare(`SELECT * FROM users`).all();
+    const query = db.prepare(`SELECT * FROM users`).get();
 
     return res.json({
       status: 200,
@@ -20,10 +22,14 @@ router.get("/", function (req, res) {
   }
 });
 
-let userValidation = [body("email").isEmail(), body("name").notEmpty()];
+let userValidation = [
+  body("email").isEmail(),
+  body("name").notEmpty(),
+  body("password").notEmpty(),
+];
 
 // Fungsi Memasukkan Data = BetterSqlite3
-router.post("/store", userValidation, function (req, res) {
+router.post("/register", userValidation, async function (req, res) {
   const error = validationResult(req);
   if (!error.isEmpty()) {
     return res.status(422).json({
@@ -33,10 +39,12 @@ router.post("/store", userValidation, function (req, res) {
 
   try {
     const query = db.prepare(
-      `INSERT INTO users (email, name, updatedAt) VALUES (?, ?, CURRENT_TIMESTAMP)`
+      `INSERT INTO users (email, name, password, updatedAt) VALUES (?, ?, ?, CURRENT_TIMESTAMP)`
     );
 
-    query.run(req.body.email, req.body.name);
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+
+    query.run(req.body.email, req.body.name, hashedPassword);
 
     return res.json({
       status: 201,
@@ -44,6 +52,52 @@ router.post("/store", userValidation, function (req, res) {
     });
   } catch (e) {
     console.error(`Error inserting data: ${e}`);
+  }
+});
+
+router.post("/login", async function (req, res) {
+  try {
+    const user = db
+      .prepare(`SELECT * FROM users WHERE email = (?)`)
+      .get(req.body.email);
+
+    // if (user) {
+    //   return res.json({
+    //     data: user.email,
+    //   });
+    // }
+
+    if (!user) {
+      return res.json({
+        status: 401,
+        message: "Invalid Credentials",
+      });
+    }
+
+    const passwordMatch = await bcrypt.compare(
+      req.body.password,
+      user.password
+    );
+    if (!passwordMatch) {
+      return res.json({
+        status: 401,
+        message: "Invalid Credentials",
+      });
+    }
+
+    const token = jwt.sign(
+      {
+        email: user.email,
+      },
+      "secret"
+    );
+
+    res.json({
+      status: 200,
+      token: token,
+    });
+  } catch (e) {
+    console.error(`Error: ${e}`);
   }
 });
 
