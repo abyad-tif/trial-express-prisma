@@ -2,13 +2,14 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const verifyToken = require("../middleware/token");
 
 const { body, validationResult } = require("express-validator");
 
 const db = require("../connection/database");
 
 // Fungsi Menampilkan Data - BetterSqlite3
-router.get("/", function (req, res) {
+router.get("/", verifyToken, function (req, res) {
   try {
     const query = db.prepare(`SELECT * FROM users`).get();
 
@@ -28,7 +29,7 @@ let userValidation = [
   body("password").notEmpty(),
 ];
 
-// Fungsi Memasukkan Data = BetterSqlite3
+// Fungsi Register Data = BetterSqlite3
 router.post("/register", userValidation, async function (req, res) {
   const error = validationResult(req);
   if (!error.isEmpty()) {
@@ -83,7 +84,10 @@ router.post("/login", async function (req, res) {
       {
         email: user.email,
       },
-      "secret"
+      "secret",
+      {
+        expiresIn: "1h",
+      }
     );
 
     res.json({
@@ -95,22 +99,23 @@ router.post("/login", async function (req, res) {
   }
 });
 
-// router.post("/logout", function (req, res) {
-//   req.session.destroy((err) => {
-//     if (err) {
-//       console.error(`Error: `, err);
-//       return res.json({
-//         status: 500,
-//         message: "Internal Server Error",
-//       });
-//     } else {
-//       return res.json({
-//         status: 200,
-//         message: "Logged Out Successfully",
-//       });
-//     }
-//   });
-// });
+router.post("/logout", verifyToken, function (req, res) {
+  try {
+    const token = localStorage.getItem("token");
+
+    localStorage.removeItem("token");
+  } catch (e) {
+    return res.json({
+      status: 400,
+      message: "Logout gagal",
+    });
+  }
+
+  return res.json({
+    status: 200,
+    message: "Logged Out Successfully",
+  });
+});
 
 // Fungsi Detail Data - Bettersqlite3
 router.get("/:id", function (req, res) {
