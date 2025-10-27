@@ -6,9 +6,22 @@ const app = express();
 const router = express.Router();
 const PORT = 3000;
 
+const { PrismaClient } = require("../src/generated/prisma");
+const prisma = new PrismaClient();
+
 app.get("/", (req, res) => {
   res.json({
     message: "Express + Prisma + Sqlite",
+  });
+});
+
+app.get("/test", async (req, res) => {
+  const users = await prisma.user.findMany();
+
+  return res.json({
+    status: 200,
+    message: "List Data Users",
+    data: users,
   });
 });
 

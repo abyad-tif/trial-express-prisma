@@ -5,15 +5,19 @@ const { body, validationResult } = require("express-validator");
 
 const db = require("../connection/database");
 
+const { PrismaClient } = require("../generated/prisma");
+const prisma = new PrismaClient();
+
 // Fungsi Menampilkan Data - BetterSqlite3
-router.get("/", function (req, res) {
+router.get("/", async function (req, res) {
   try {
-    const query = db.prepare(`SELECT * FROM alumni`).all();
+    // const query = db.prepare(`SELECT * FROM alumni`).all();
+    const user = await prisma.alumni.findMany();
 
     return res.json({
       status: 200,
       message: "List Data Alumni",
-      data: query,
+      data: user,
     });
   } catch (e) {
     console.error(`Error fetching data: ${e}`);
@@ -30,7 +34,7 @@ let alumniValidation = [
 ];
 
 // Fungsi Memasukkan Data = BetterSqlite3
-router.post("/store", alumniValidation, function (req, res) {
+router.post("/store", alumniValidation, async function (req, res) {
   const error = validationResult(req);
   if (!error.isEmpty()) {
     return res.status(422).json({
@@ -39,29 +43,40 @@ router.post("/store", alumniValidation, function (req, res) {
   }
 
   try {
-    const query = db.prepare(
-      `INSERT INTO alumni (name, nim, email, gender, no_wa, tmpt_tinggal) VALUES (?, ?, ?, ?, ?, ?)`
-    );
+    // const query = db.prepare(
+    //   `INSERT INTO alumni (name, nim, email, gender, no_wa, tmpt_tinggal) VALUES (?, ?, ?, ?, ?, ?)`
+    // );
 
-    let formData = {
-      name: req.body.name,
-      nim: req.body.nim,
-      email: req.body.email,
-      gender: req.body.gender,
-      no_wa: req.body.no_wa,
-      tmpt_tinggal: req.body.tmpt_tinggal,
-    };
+    // let formData = {
+    //   name: req.body.name,
+    //   nim: req.body.nim,
+    //   email: req.body.email,
+    //   gender: req.body.gender,
+    //   no_wa: req.body.no_wa,
+    //   tmpt_tinggal: req.body.tmpt_tinggal,
+    // };
 
-    query.run(
-      formData.name,
-      formData.nim,
-      formData.email,
-      formData.gender,
-      formData.no_wa,
-      formData.tmpt_tinggal
-    );
+    // query.run(
+    //   formData.name,
+    //   formData.nim,
+    //   formData.email,
+    //   formData.gender,
+    //   formData.no_wa,
+    //   formData.tmpt_tinggal
+    // );
 
     // query.run(formData);
+
+    await prisma.alumni.create({
+      data: {
+        name: req.body.name,
+        nim: req.body.nim,
+        email: req.body.email,
+        gender: req.body.gender,
+        no_wa: req.body.no_wa,
+        tmpt_tinggal: req.body.tmpt_tinggal,
+      },
+    });
 
     return res.json({
       status: 201,

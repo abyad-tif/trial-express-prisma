@@ -8,15 +8,19 @@ const { body, validationResult } = require("express-validator");
 
 const db = require("../connection/database");
 
+const { PrismaClient } = require("../generated/prisma");
+const prisma = new PrismaClient();
+
 // Fungsi Menampilkan Data - BetterSqlite3
-router.get("/", verifyToken, function (req, res) {
+router.get("/", async function (req, res) {
   try {
-    const query = db.prepare(`SELECT * FROM users`).get();
+    // const query = db.prepare(`SELECT * FROM users`).get();
+    const user = await prisma.user.findMany();
 
     return res.json({
       status: 200,
       message: "List Data Users",
-      data: query,
+      data: user,
     });
   } catch (e) {
     console.error(`Error fetching data: ${e}`);
@@ -39,13 +43,19 @@ router.post("/register", userValidation, async function (req, res) {
   }
 
   try {
-    const query = db.prepare(
-      `INSERT INTO users (email, name, password, updatedAt) VALUES (?, ?, ?, CURRENT_TIMESTAMP)`
-    );
-
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
-    query.run(req.body.email, req.body.name, hashedPassword);
+    const date = new Date();
+
+    await prisma.user.create({
+      data: {
+        email: req.body.email,
+        name: req.body.name,
+        password: hashedPassword,
+        createdAt: date,
+        updatedAt: date,
+      },
+    });
 
     return res.json({
       status: 201,
@@ -58,9 +68,11 @@ router.post("/register", userValidation, async function (req, res) {
 
 router.post("/login", async function (req, res) {
   try {
-    const user = db
-      .prepare(`SELECT * FROM users WHERE email = (?)`)
-      .get(req.body.email);
+    const user = await prisma.user.findUnique({
+      where: {
+        email: req.body.email,
+      },
+    });
 
     if (!user) {
       return res.json({
@@ -118,8 +130,23 @@ router.post("/logout", verifyToken, function (req, res) {
 });
 
 // Fungsi Detail Data - Bettersqlite3
-router.get("/:id", function (req, res) {
+router.get("/:id", async function (req, res) {
   const id = req.params.id;
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: id,
+      },
+    });
+
+    res.json({
+      status: 200,
+      message: `Post Dari ${id}`,
+    });
+  } catch (e) {
+    console.error(`Error: ${e}`);
+  }
 
   const query = db.prepare(`SELECT * FROM users WHERE id = ${id}`).all();
 
