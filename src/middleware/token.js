@@ -13,7 +13,7 @@ const verifyToken = (req, res, next) => {
     });
   }
 
-  jwt.verify(token, "secret", (err, decoded) => {
+  jwt.verify(token, process.env.JWT_ACCESS_SECRET, (err, user) => {
     if (err) {
       return res.json({
         status: 403,
@@ -21,7 +21,7 @@ const verifyToken = (req, res, next) => {
       });
     }
 
-    req.user = decoded;
+    req.user = user;
     next();
   });
 };

@@ -6,20 +6,24 @@ const verifyToken = require("../middleware/token");
 
 const { body, validationResult } = require("express-validator");
 
-const db = require("../connection/database");
+// const prisma = require("../utils/db");
 
 const { PrismaClient } = require("../generated/prisma");
+
 const prisma = new PrismaClient();
 
 // Fungsi Menampilkan Data - BetterSqlite3
-router.get("/", async function (req, res) {
+router.get("/", verifyToken, async function (req, res) {
   try {
-    // const query = db.prepare(`SELECT * FROM users`).get();
-    const user = await prisma.user.findMany();
+    const user = await prisma.user.findUnique({
+      where: {
+        email: req.user.email,
+      },
+    });
 
     return res.json({
       status: 200,
-      message: "List Data Users",
+      message: "Data Users",
       data: user,
     });
   } catch (e) {
@@ -52,8 +56,6 @@ router.post("/register", userValidation, async function (req, res) {
         email: req.body.email,
         name: req.body.name,
         password: hashedPassword,
-        createdAt: date,
-        updatedAt: date,
       },
     });
 
@@ -96,15 +98,17 @@ router.post("/login", async function (req, res) {
       {
         email: user.email,
       },
-      "secret",
+      process.env.JWT_ACCESS_SECRET,
       {
-        expiresIn: "1h",
+        expiresIn: "30m",
       }
     );
 
     res.json({
       status: 200,
-      token: token,
+      access_token: token,
+      token_type: "bearer",
+      expired_in: 1800,
     });
   } catch (e) {
     console.error(`Error: ${e}`);
@@ -113,13 +117,17 @@ router.post("/login", async function (req, res) {
 
 router.post("/logout", verifyToken, function (req, res) {
   try {
-    const token = localStorage.getItem("token");
+    res.cookie("access_token");
 
-    localStorage.removeItem("token");
+    return res.json({
+      status: 200,
+      message: "Logout berhasil",
+    });
   } catch (e) {
     return res.json({
       status: 400,
       message: "Logout gagal",
+      err: `${e}`,
     });
   }
 
