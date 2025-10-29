@@ -3,16 +3,17 @@ const router = express.Router();
 
 const { body, validationResult } = require("express-validator");
 
-const db = require("../connection/database");
-
-const { PrismaClient } = require("../generated/prisma");
-const prisma = new PrismaClient();
+const { verify } = require("crypto");
+const verifyToken = require("../middleware/token");
+const prisma = require("../utils/db");
 
 // Fungsi Menampilkan Data - BetterSqlite3
-router.get("/", async function (req, res) {
+router.get("/", verifyToken, async function (req, res) {
   try {
     // const query = db.prepare(`SELECT * FROM alumni`).all();
-    const user = await prisma.alumni.findMany();
+    const user = await prisma.alumni.findUnique({
+      where: req.user.alumni_id,
+    });
 
     return res.json({
       status: 200,
@@ -43,30 +44,6 @@ router.post("/store", alumniValidation, async function (req, res) {
   }
 
   try {
-    // const query = db.prepare(
-    //   `INSERT INTO alumni (name, nim, email, gender, no_wa, tmpt_tinggal) VALUES (?, ?, ?, ?, ?, ?)`
-    // );
-
-    // let formData = {
-    //   name: req.body.name,
-    //   nim: req.body.nim,
-    //   email: req.body.email,
-    //   gender: req.body.gender,
-    //   no_wa: req.body.no_wa,
-    //   tmpt_tinggal: req.body.tmpt_tinggal,
-    // };
-
-    // query.run(
-    //   formData.name,
-    //   formData.nim,
-    //   formData.email,
-    //   formData.gender,
-    //   formData.no_wa,
-    //   formData.tmpt_tinggal
-    // );
-
-    // query.run(formData);
-
     await prisma.alumni.create({
       data: {
         name: req.body.name,
@@ -106,47 +83,5 @@ router.get("/:id", function (req, res) {
     });
   }
 });
-
-// Fungsi Update Berdasarkan ID - BetterSqlite3
-// router.patch("/update/:id", profileValidation, function (req, res) {
-//   const error = validationResult(req);
-//   if (!error.isEmpty()) {
-//     return res.status(422).json({
-//       errors: error.array(),
-//     });
-//   }
-
-//   let id = req.params.id;
-
-//   try {
-//     const query = db.prepare(
-//       `UPDATE users SET email = ?, name = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ${id}`
-//     );
-
-//     query.run(req.body.email, req.body.name);
-
-//     return res.json({
-//       status: 201,
-//       message: "Data berhasil diubah",
-//     });
-//   } catch (e) {
-//     console.error(`Error updating data: ${e}`);
-//   }
-// });
-
-// router.delete("/delete/:id", function (req, res) {
-//   let id = req.params.id;
-
-//   try {
-//     const query = db.prepare(`DELETE FROM users WHERE id = ?`).run(id);
-
-//     return res.json({
-//       status: 200,
-//       message: "Users berhasil dihapus!",
-//     });
-//   } catch (e) {
-//     console.error(`Error deleting users: ${e}`);
-//   }
-// });
 
 module.exports = router;

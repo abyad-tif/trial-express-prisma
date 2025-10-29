@@ -6,11 +6,7 @@ const verifyToken = require("../middleware/token");
 
 const { body, validationResult } = require("express-validator");
 
-// const prisma = require("../utils/db");
-
-const { PrismaClient } = require("../generated/prisma");
-
-const prisma = new PrismaClient();
+const prisma = require("../utils/db");
 
 // Fungsi Menampilkan Data - BetterSqlite3
 router.get("/", verifyToken, async function (req, res) {
@@ -117,7 +113,10 @@ router.post("/login", async function (req, res) {
 
 router.post("/logout", verifyToken, function (req, res) {
   try {
-    res.cookie("access_token");
+    res.cookie("access_token", req.user.token, {
+      httpOnly: true,
+      maxAge: 0,
+    });
 
     return res.json({
       status: 200,
@@ -130,11 +129,6 @@ router.post("/logout", verifyToken, function (req, res) {
       err: `${e}`,
     });
   }
-
-  return res.json({
-    status: 200,
-    message: "Logged Out Successfully",
-  });
 });
 
 // Fungsi Detail Data - Bettersqlite3
