@@ -12,7 +12,7 @@ router.get("/", verifyToken, async function (req, res) {
   try {
     // const query = db.prepare(`SELECT * FROM alumni`).all();
     const user = await prisma.alumni.findUnique({
-      where: req.user.alumni_id,
+      where: req.user.email,
     });
 
     return res.json({
