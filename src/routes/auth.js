@@ -34,8 +34,7 @@ router.post("/register", userValidation, async function (req, res) {
         name: req.body.name,
         password: hashedPassword,
         alumni: {
-          email: req.body.email,
-          name: req.body.name,
+          create: {},
         },
       },
     });

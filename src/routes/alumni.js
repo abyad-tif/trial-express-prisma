@@ -12,12 +12,12 @@ router.get("/", verifyToken, async function (req, res) {
   try {
     // const query = db.prepare(`SELECT * FROM alumni`).all();
     const user = await prisma.alumni.findUnique({
-      where: req.user.email,
+      where: { alumni_email: req.user.email },
     });
 
     return res.json({
       status: 200,
-      message: "List Data Alumni",
+      message: "Data Profil",
       data: user,
     });
   } catch (e) {
@@ -35,7 +35,7 @@ let alumniValidation = [
 ];
 
 // Fungsi Memasukkan Data = BetterSqlite3
-router.post("/store", alumniValidation, async function (req, res) {
+router.post("/store", alumniValidation, verifyToken, async function (req, res) {
   const error = validationResult(req);
   if (!error.isEmpty()) {
     return res.status(422).json({
@@ -44,7 +44,8 @@ router.post("/store", alumniValidation, async function (req, res) {
   }
 
   try {
-    await prisma.alumni.create({
+    await prisma.alumni.update({
+      where: { alumni_email: req.user.email },
       data: {
         name: req.body.name,
         nim: req.body.nim,
@@ -57,7 +58,7 @@ router.post("/store", alumniValidation, async function (req, res) {
 
     return res.json({
       status: 201,
-      message: "Data berhasil ditambahkan",
+      message: "Data berhasil diubah",
     });
   } catch (e) {
     console.error(`Error inserting data: ${e}`);
