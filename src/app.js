@@ -17,16 +17,6 @@ app.get("/", (req, res) => {
   });
 });
 
-app.get("/test", async (req, res) => {
-  const users = await prisma.user.findMany();
-
-  return res.json({
-    status: 200,
-    message: "List Data Users",
-    data: users,
-  });
-});
-
 app.use(express.json());
 app.use(express.urlencoded());
 // app.use(verifyToken);

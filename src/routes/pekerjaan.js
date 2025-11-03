@@ -10,7 +10,7 @@ const prisma = require("../utils/db");
 // Fungsi Menampilkan Data - BetterSqlite3
 router.get("/", verifyToken, async function (req, res) {
   try {
-    const user = await prisma.pendidikan.findMany({
+    const user = await prisma.pekerjaan.findMany({
       where: { alumni_email: req.user.email },
     });
 
@@ -25,12 +25,12 @@ router.get("/", verifyToken, async function (req, res) {
 });
 
 let pendidikanValidation = [
-  body("jenjang").notEmpty(),
+  body("nama_pekerjaan").notEmpty(),
+  body("jabatan").notEmpty(),
+  body("alamat").notEmpty(),
+  body("industri").notEmpty(),
   body("thn_masuk").notEmpty(),
-  body("thn_lulus").notEmpty(),
-  body("universitas").notEmpty(),
-  body("fakultas").notEmpty(),
-  body("prodi").notEmpty(),
+  body("thn_keluar").notEmpty(),
 ];
 
 // Fungsi Memasukkan Data - Non User Login
