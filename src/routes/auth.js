@@ -36,6 +36,9 @@ router.post("/register", userValidation, async function (req, res) {
         alumni: {
           create: {},
         },
+        // pendidikan: {
+        //   create: {},
+        // },
       },
     });
 

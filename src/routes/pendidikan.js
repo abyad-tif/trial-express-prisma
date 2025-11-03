@@ -3,21 +3,20 @@ const router = express.Router();
 
 const { body, validationResult } = require("express-validator");
 
-const { verify } = require("crypto");
+// const { verify } = require("crypto");
 const verifyToken = require("../middleware/token");
 const prisma = require("../utils/db");
 
 // Fungsi Menampilkan Data - BetterSqlite3
 router.get("/", verifyToken, async function (req, res) {
   try {
-    // const query = db.prepare(`SELECT * FROM alumni`).all();
-    const user = await prisma.alumni.findUnique({
+    const user = await prisma.pendidikan.findUnique({
       where: { alumni_email: req.user.email },
     });
 
     return res.json({
       status: 200,
-      message: "Data Profil",
+      message: "Data Pendidikan",
       data: user,
     });
   } catch (e) {
@@ -25,17 +24,17 @@ router.get("/", verifyToken, async function (req, res) {
   }
 });
 
-let alumniValidation = [
-  body("name").notEmpty(),
-  body("nim").notEmpty(),
-  body("email").isEmail(),
-  body("gender").notEmpty(),
-  body("no_wa").notEmpty(),
-  body("tmpt_tinggal").notEmpty(),
+let pendidikanValidation = [
+  body("jenjang").notEmpty(),
+  body("thn_masuk").notEmpty(),
+  body("thn_lulus").notEmpty(),
+  body("universitas").notEmpty(),
+  body("fakultas").notEmpty(),
+  body("prodi").notEmpty(),
 ];
 
 // Fungsi Memasukkan Data - Non User Login
-router.post("/store", alumniValidation, async function (req, res) {
+router.post("/store", pendidikanValidation, async function (req, res) {
   const error = validationResult(req);
   if (!error.isEmpty()) {
     return res.status(422).json({
@@ -44,14 +43,14 @@ router.post("/store", alumniValidation, async function (req, res) {
   }
 
   try {
-    await prisma.alumni.create({
+    await prisma.pendidikan.create({
       data: {
-        name: req.body.name,
-        nim: req.body.nim,
-        email: req.body.email,
-        gender: req.body.gender,
-        no_wa: req.body.no_wa,
-        tmpt_tinggal: req.body.tmpt_tinggal,
+        jenjang: req.body.jenjang,
+        thn_masuk: req.body.thn_masuk,
+        thn_lulus: req.body.thn_lulus,
+        universitas: req.body.universitas,
+        fakultas: req.body.fakultas,
+        prodi: req.body.prodi,
       },
     });
 
@@ -67,7 +66,7 @@ router.post("/store", alumniValidation, async function (req, res) {
 // Fungsi Memasukkan Data - User login
 router.post(
   "/update",
-  alumniValidation,
+  pendidikanValidation,
   verifyToken,
   async function (req, res) {
     const error = validationResult(req);
@@ -78,15 +77,20 @@ router.post(
     }
 
     try {
-      await prisma.alumni.update({
-        where: { alumni_email: req.user.email },
+      await prisma.pendidikan.create({
+        // where: { alumni_email: req.user.email },
         data: {
-          name: req.body.name,
-          nim: req.body.nim,
-          email: req.body.email,
-          gender: req.body.gender,
-          no_wa: req.body.no_wa,
-          tmpt_tinggal: req.body.tmpt_tinggal,
+          jenjang: req.body.jenjang,
+          thn_masuk: req.body.thn_masuk,
+          thn_lulus: req.body.thn_lulus,
+          universitas: req.body.universitas,
+          fakultas: req.body.fakultas,
+          prodi: req.body.prodi,
+          user: {
+            connect: {
+              email: req.user.email,
+            },
+          },
         },
       });
 
