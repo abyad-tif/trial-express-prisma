@@ -33,41 +33,6 @@ let userValidation = [
   body("password").notEmpty(),
 ];
 
-// Fungsi Detail Data - Bettersqlite3
-// router.get("/:id", async function (req, res) {
-//   const id = req.params.id;
-
-//   try {
-//     const user = await prisma.user.findUnique({
-//       where: {
-//         id: id,
-//       },
-//     });
-
-//     res.json({
-//       status: 200,
-//       message: `Post Dari ${id}`,
-//     });
-//   } catch (e) {
-//     console.error(`Error: ${e}`);
-//   }
-
-//   const query = db.prepare(`SELECT * FROM users WHERE id = ${id}`).all();
-
-//   if (query.length <= 0) {
-//     return res.json({
-//       status: 404,
-//       message: "Data User tak ditemukan.",
-//     });
-//   } else {
-//     return res.json({
-//       status: 200,
-//       message: `Data Dari ${id}`,
-//       data: query,
-//     });
-//   }
-// });
-
 // Fungsi Update Berdasarkan ID - BetterSqlite3
 router.patch("/update", userValidation, verifyToken, async function (req, res) {
   const error = validationResult(req);
@@ -77,14 +42,7 @@ router.patch("/update", userValidation, verifyToken, async function (req, res) {
     });
   }
 
-  // let id = req.params.id;
-
   try {
-    // const query = db.prepare(
-    //   `UPDATE users SET email = ?, name = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ${id}`
-    // );
-
-    // query.run(req.body.email, req.body.name);
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
     const user = await prisma.user.update({
       where: {
@@ -107,19 +65,19 @@ router.patch("/update", userValidation, verifyToken, async function (req, res) {
   }
 });
 
-router.delete("/delete/:id", function (req, res) {
-  let id = req.params.id;
+// router.delete("/delete/:id", function (req, res) {
+//   let id = req.params.id;
 
-  try {
-    const query = db.prepare(`DELETE FROM users WHERE id = ?`).run(id);
+//   try {
+//     const query = db.prepare(`DELETE FROM users WHERE id = ?`).run(id);
 
-    return res.json({
-      status: 200,
-      message: "Users berhasil dihapus!",
-    });
-  } catch (e) {
-    console.error(`Error deleting users: ${e}`);
-  }
-});
+//     return res.json({
+//       status: 200,
+//       message: "Users berhasil dihapus!",
+//     });
+//   } catch (e) {
+//     console.error(`Error deleting users: ${e}`);
+//   }
+// });
 
 module.exports = router;
