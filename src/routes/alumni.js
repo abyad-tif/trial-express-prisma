@@ -65,7 +65,7 @@ router.post("/store", alumniValidation, async function (req, res) {
 });
 
 // Fungsi Memasukkan Data - User login
-router.post(
+router.patch(
   "/update",
   alumniValidation,
   verifyToken,
@@ -99,25 +99,5 @@ router.post(
     }
   }
 );
-
-// Fungsi Detail Data - Bettersqlite3
-router.get("/:id", function (req, res) {
-  const id = req.params.id;
-
-  const query = db.prepare(`SELECT * FROM alumni WHERE id = ${id}`).all();
-
-  if (query.length <= 0) {
-    return res.json({
-      status: 404,
-      message: "Data User tak ditemukan.",
-    });
-  } else {
-    return res.json({
-      status: 200,
-      message: `Data Dari ${id}`,
-      data: query,
-    });
-  }
-});
 
 module.exports = router;
