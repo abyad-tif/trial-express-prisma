@@ -4,6 +4,7 @@ const userAlumniRouter = require("./routes/alumni");
 const userPendidikanRouter = require("./routes/pendidikan");
 const userPekerjaanRouter = require("./routes/pekerjaan");
 const auth = require("./routes/auth");
+const admin = require("./routes/admin");
 const verifyToken = require("./middleware/token");
 const app = express();
 const router = express.Router();
@@ -26,6 +27,7 @@ app.use("/api/getDataUsers", usersRouter);
 app.use("/api/getDataAlumni", userAlumniRouter);
 app.use("/api/getDataPendidikan", userPendidikanRouter);
 app.use("/api/getDataPekerjaan", userPekerjaanRouter);
+app.use("/api/admin", admin);
 
 app.listen(PORT, () => {
   console.log(`Server berjalan di port ${PORT}`);
