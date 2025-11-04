@@ -96,7 +96,7 @@ router.post(
 
       return res.json({
         status: 201,
-        message: "Data berhasil diubah",
+        message: "Data Berhasil Ditambahkan",
       });
     } catch (e) {
       console.error(`Error inserting data: ${e}`);

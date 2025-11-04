@@ -16,7 +16,7 @@ router.get("/", verifyToken, async function (req, res) {
 
     return res.json({
       status: 200,
-      message: "Data Pendidikan",
+      message: "Data Pekerjaan",
       data: user,
     });
   } catch (e) {
@@ -24,8 +24,8 @@ router.get("/", verifyToken, async function (req, res) {
   }
 });
 
-let pendidikanValidation = [
-  body("nama_pekerjaan").notEmpty(),
+let pekerjaanValidation = [
+  body("nama_perusahaan").notEmpty(),
   body("jabatan").notEmpty(),
   body("alamat").notEmpty(),
   body("industri").notEmpty(),
@@ -34,7 +34,7 @@ let pendidikanValidation = [
 ];
 
 // Fungsi Memasukkan Data - Non User Login
-router.post("/store", pendidikanValidation, async function (req, res) {
+router.post("/store", pekerjaanValidation, async function (req, res) {
   const error = validationResult(req);
   if (!error.isEmpty()) {
     return res.status(422).json({
@@ -43,14 +43,14 @@ router.post("/store", pendidikanValidation, async function (req, res) {
   }
 
   try {
-    await prisma.pendidikan.create({
+    await prisma.pekerjaan.create({
       data: {
-        jenjang: req.body.jenjang,
+        nama_perusahaan: req.body.nama_perusahaan,
+        jabatan: req.body.jabatan,
+        alamat: req.body.alamat,
+        industri: req.body.industri,
         thn_masuk: req.body.thn_masuk,
-        thn_lulus: req.body.thn_lulus,
-        universitas: req.body.universitas,
-        fakultas: req.body.fakultas,
-        prodi: req.body.prodi,
+        thn_keluar: req.body.thn_keluar,
       },
     });
 
@@ -66,7 +66,7 @@ router.post("/store", pendidikanValidation, async function (req, res) {
 // Fungsi Memasukkan Data - User login
 router.post(
   "/update",
-  pendidikanValidation,
+  pekerjaanValidation,
   verifyToken,
   async function (req, res) {
     const error = validationResult(req);
@@ -77,15 +77,15 @@ router.post(
     }
 
     try {
-      await prisma.pendidikan.create({
+      await prisma.pekerjaan.create({
         // where: { alumni_email: req.user.email },
         data: {
-          jenjang: req.body.jenjang,
+          nama_perusahaan: req.body.nama_perusahaan,
+          jabatan: req.body.jabatan,
+          alamat: req.body.alamat,
+          industri: req.body.industri,
           thn_masuk: req.body.thn_masuk,
-          thn_lulus: req.body.thn_lulus,
-          universitas: req.body.universitas,
-          fakultas: req.body.fakultas,
-          prodi: req.body.prodi,
+          thn_keluar: req.body.thn_keluar,
           user: {
             connect: {
               email: req.user.email,
@@ -103,25 +103,5 @@ router.post(
     }
   }
 );
-
-// Fungsi Detail Data - Bettersqlite3
-router.get("/:id", function (req, res) {
-  const id = req.params.id;
-
-  const query = db.prepare(`SELECT * FROM alumni WHERE id = ${id}`).all();
-
-  if (query.length <= 0) {
-    return res.json({
-      status: 404,
-      message: "Data User tak ditemukan.",
-    });
-  } else {
-    return res.json({
-      status: 200,
-      message: `Data Dari ${id}`,
-      data: query,
-    });
-  }
-});
 
 module.exports = router;
