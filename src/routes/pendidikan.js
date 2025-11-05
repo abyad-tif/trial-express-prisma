@@ -11,7 +11,7 @@ const prisma = require("../utils/db");
 router.get("/", verifyToken, async function (req, res) {
   try {
     const user = await prisma.pendidikan.findMany({
-      where: { alumni_email: req.user.email },
+      where: { pendidikan_id: req.user.id },
     });
 
     return res.json({
@@ -88,7 +88,7 @@ router.post(
           prodi: req.body.prodi,
           user: {
             connect: {
-              email: req.user.email,
+              id: req.user.id,
             },
           },
         },

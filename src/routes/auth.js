@@ -9,9 +9,9 @@ const { body, validationResult } = require("express-validator");
 const prisma = require("../utils/db");
 
 let userValidation = [
-  body("email").isEmail(),
-  body("name").notEmpty(),
-  body("password").notEmpty(),
+  body("nim").notEmpty(),
+  // body("name").notEmpty(),
+  // body("password").notEmpty(),
 ];
 
 // Fungsi Register Data = BetterSqlite3
@@ -24,14 +24,13 @@ router.post("/register", userValidation, async function (req, res) {
   }
 
   try {
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    const hashedPassword = await bcrypt.hash(req.body.nim, 10);
 
     const date = new Date();
 
     await prisma.user.create({
       data: {
-        email: req.body.email,
-        name: req.body.name,
+        nim: req.body.nim,
         password: hashedPassword,
         alumni: {
           create: {},
@@ -55,7 +54,7 @@ router.post("/login", async function (req, res) {
   try {
     const user = await prisma.user.findUnique({
       where: {
-        email: req.body.email,
+        nim: req.body.nim,
       },
     });
 
@@ -79,7 +78,7 @@ router.post("/login", async function (req, res) {
 
     const token = jwt.sign(
       {
-        email: user.email,
+        id: user.id,
         role: user.role,
       },
       process.env.JWT_ACCESS_SECRET,
