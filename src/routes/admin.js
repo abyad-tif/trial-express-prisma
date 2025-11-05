@@ -36,6 +36,12 @@ router.post(
   authorizeRole,
   async function (req, res) {
     try {
+      const name = await prisma.user.findUnique({
+        where: { email: req.body.email },
+        select: {
+          name: true,
+        },
+      });
       // const user = await prisma.user.findMany();
       const alumni = await prisma.alumni.findUnique({
         where: { alumni_email: req.body.email },
@@ -49,7 +55,8 @@ router.post(
 
       return res.json({
         status: 200,
-        message: "Semua Data",
+        message: `Semua Data`,
+        user: name,
         alumni: alumni,
         pendidikan: pendidikan,
         pekerjaan: pekerjaan,
