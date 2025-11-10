@@ -7,13 +7,21 @@ const authorizeRole = require("../middleware/role");
 
 const { body, validationResult } = require("express-validator");
 
+const { Role } = require("../generated/prisma");
 const prisma = require("../utils/db");
 
 // Fungsi Menampilkan Semua Data
 router.get("/", verifyToken, authorizeRole, async function (req, res) {
   try {
     // const user = await prisma.user.findMany();
-    const alumni = await prisma.alumni.findMany();
+    // const role = USER;
+    const alumni = await prisma.alumni.findMany({
+      where: {
+        user: {
+          role: Role["USER"],
+        },
+      },
+    });
     const pendidikan = await prisma.pendidikan.findMany();
     const pekerjaan = await prisma.pekerjaan.findMany();
 
@@ -36,21 +44,28 @@ router.post(
   authorizeRole,
   async function (req, res) {
     try {
-      const name = await prisma.user.findUnique({
-        where: { email: req.body.email },
+      const id = await prisma.user.findUnique({
+        where: {
+          nim: req.body.nim,
+        },
+        select: {
+          id: true,
+        },
+      });
+      const name = await prisma.alumni.findUnique({
+        where: id,
         select: {
           name: true,
         },
       });
-      // const user = await prisma.user.findMany();
       const alumni = await prisma.alumni.findUnique({
-        where: { alumni_email: req.body.email },
+        where: id,
       });
       const pendidikan = await prisma.pendidikan.findMany({
-        where: { alumni_email: req.body.email },
+        where: id,
       });
       const pekerjaan = await prisma.pekerjaan.findMany({
-        where: { alumni_email: req.body.email },
+        where: id,
       });
 
       return res.json({

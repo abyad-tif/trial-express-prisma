@@ -13,7 +13,7 @@ router.get("/", verifyToken, async function (req, res) {
   try {
     const user = await prisma.user.findUnique({
       where: {
-        email: req.user.email,
+        id: req.user.id,
       },
     });
 
