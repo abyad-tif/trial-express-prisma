@@ -15,6 +15,12 @@ const jwt = require("jsonwebtoken");
 // };
 
 function authorizeRole(req, res, next) {
+  // if (!req.user.role) {
+  //   return res.json({
+  //     status: 403,
+  //     message: "Forbidden",
+  //   });
+  // }
   if (req.user.role === "ADMIN") {
     return next();
   }

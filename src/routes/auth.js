@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const verifyToken = require("../middleware/token");
+const authorizeRole = require("../middleware/role");
 
 const { body, validationResult } = require("express-validator");
 
@@ -15,40 +16,46 @@ let userValidation = [
 ];
 
 // Fungsi Register Data = BetterSqlite3
-router.post("/register", userValidation, async function (req, res) {
-  const error = validationResult(req);
-  if (!error.isEmpty()) {
-    return res.status(422).json({
-      errors: error.array(),
-    });
-  }
+router.post(
+  "/register",
+  userValidation,
+  verifyToken,
+  authorizeRole,
+  async function (req, res) {
+    const error = validationResult(req);
+    if (!error.isEmpty()) {
+      return res.status(422).json({
+        errors: error.array(),
+      });
+    }
 
-  try {
-    const hashedPassword = await bcrypt.hash(req.body.nim, 10);
+    try {
+      const hashedPassword = await bcrypt.hash(req.body.nim, 10);
 
-    const date = new Date();
+      const date = new Date();
 
-    await prisma.user.create({
-      data: {
-        nim: req.body.nim,
-        password: hashedPassword,
-        alumni: {
-          create: {},
+      await prisma.user.create({
+        data: {
+          nim: req.body.nim,
+          password: hashedPassword,
+          alumni: {
+            create: {},
+          },
+          // pendidikan: {
+          //   create: {},
+          // },
         },
-        // pendidikan: {
-        //   create: {},
-        // },
-      },
-    });
+      });
 
-    return res.json({
-      status: 201,
-      message: "Data berhasil ditambahkan",
-    });
-  } catch (e) {
-    console.error(`Error inserting data: ${e}`);
+      return res.json({
+        status: 201,
+        message: "Data berhasil ditambahkan",
+      });
+    } catch (e) {
+      console.error(`Error inserting data: ${e}`);
+    }
   }
-});
+);
 
 router.post("/login", async function (req, res) {
   try {
