@@ -9,7 +9,8 @@ const admin = require("./routes/admin");
 const verifyToken = require("./middleware/token");
 const app = express();
 const router = express.Router();
-const PORT = 3000;
+const cors = require("cors");
+const PORT = 3001;
 
 const { PrismaClient } = require("../src/generated/prisma");
 const prisma = new PrismaClient();
@@ -22,6 +23,13 @@ app.get("/", (req, res) => {
 
 app.use(express.json());
 app.use(express.urlencoded());
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST", "PATCH", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 // app.use(verifyToken);
 app.use("/api/auth", auth);
 app.use("/api/getDataUsers", usersRouter);
