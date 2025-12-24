@@ -94,6 +94,13 @@ router.post("/login", async function (req, res) {
       }
     );
 
+    res.cookie("authToken", token, {
+      httpOnly: true,
+      maxAge: 3600000,
+      sameSite: "Lax",
+      path: "/",
+    });
+
     res.json({
       status: 200,
       access_token: token,
@@ -107,7 +114,7 @@ router.post("/login", async function (req, res) {
 
 router.post("/logout", verifyToken, function (req, res) {
   try {
-    res.cookie("access_token", req.user.token, {
+    res.cookie("authToken", req.user.token, {
       httpOnly: true,
       maxAge: 0,
     });

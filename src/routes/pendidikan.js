@@ -65,7 +65,7 @@ let pendidikanValidation = [
 
 // Fungsi Memasukkan Data - User login
 router.post(
-  "/update",
+  "/create",
   pendidikanValidation,
   verifyToken,
   async function (req, res) {
@@ -101,26 +101,86 @@ router.post(
     } catch (e) {
       console.error(`Error inserting data: ${e}`);
     }
-  }
+  },
 );
 
-// Fungsi Detail Data - Bettersqlite3
-router.get("/:id", function (req, res) {
-  const id = req.params.id;
+router.patch(
+  "/update/:id",
+  pendidikanValidation,
+  verifyToken,
+  async function (req, res) {
+    const error = validationResult(req);
+    if (!error.isEmpty()) {
+      return res.status(422).json({
+        errors: error.array(),
+      });
+    }
 
-  const query = db.prepare(`SELECT * FROM alumni WHERE id = ${id}`).all();
+    const id = parseInt(req.params.id);
 
-  if (query.length <= 0) {
-    return res.json({
-      status: 404,
-      message: "Data User tak ditemukan.",
+    const updatedData = {
+      jenjang: req.body.jenjang,
+      thn_masuk: req.body.thn_masuk,
+      thn_lulus: req.body.thn_lulus,
+      universitas: req.body.universitas,
+      fakultas: req.body.fakultas,
+      prodi: req.body.prodi,
+    };
+
+    // const user = await prisma.pendidikan.findUnique({
+    //   where: {
+    //     pendidikan_id: id,
+    //     user: {
+    //       is: {
+    //         id: req.user.id,
+    //       },
+    //     },
+    //   },
+    // });
+
+    try {
+      await prisma.user.update({
+        where: {
+          id: req.user.id,
+        },
+        data: {
+          pendidikan: {
+            update: {
+              where: {
+                id: id,
+              },
+              data: updatedData,
+            },
+          },
+        },
+      });
+
+      return res.json({
+        status: 200,
+        message: "Data Berhasil Diubah",
+      });
+    } catch (e) {
+      console.error(`Error updating data: ${e}`);
+    }
+  },
+);
+
+router.delete("/pendidikan/:id", verifyToken, async function (req, res) {
+  const id = parseInt(req.params.id);
+
+  try {
+    await prisma.pendidikan.delete({
+      where: {
+        id: id,
+      },
     });
-  } else {
+
     return res.json({
       status: 200,
-      message: `Data Dari ${id}`,
-      data: query,
+      message: "Data Berhasil Dihapus",
     });
+  } catch (e) {
+    console.error(`Error deleting data: ${e}`);
   }
 });
 

@@ -65,7 +65,7 @@ router.post("/store", pekerjaanValidation, async function (req, res) {
 
 // Fungsi Memasukkan Data - User login
 router.post(
-  "/update",
+  "/create",
   pekerjaanValidation,
   verifyToken,
   async function (req, res) {
@@ -96,12 +96,80 @@ router.post(
 
       return res.json({
         status: 201,
+        message: "Data berhasil Ditambahkan",
+      });
+    } catch (e) {
+      console.error(`Error inserting data: ${e}`);
+    }
+  },
+);
+
+router.patch(
+  "/update/:id",
+  pekerjaanValidation,
+  verifyToken,
+  async function (req, res) {
+    const error = validationResult(req);
+    if (!error.isEmpty()) {
+      return res.status(422).json({
+        errors: error.array(),
+      });
+    }
+
+    const id = parseInt(req.params.id);
+
+    const updatedData = {
+      nama_perusahaan: req.body.nama_perusahaan,
+      jabatan: req.body.jabatan,
+      alamat: req.body.alamat,
+      industri: req.body.industri,
+      thn_masuk: req.body.thn_masuk,
+      thn_keluar: req.body.thn_keluar,
+    };
+
+    try {
+      await prisma.user.update({
+        where: {
+          id: req.user.id,
+        },
+        data: {
+          pekerjaan: {
+            update: {
+              where: {
+                id: id,
+              },
+              data: updatedData,
+            },
+          },
+        },
+      });
+      return res.json({
+        status: 200,
         message: "Data berhasil diubah",
       });
     } catch (e) {
       console.error(`Error inserting data: ${e}`);
     }
-  }
+  },
 );
+
+router.delete("/pekerjaan/:id", verifyToken, async function (req, res) {
+  const id = parseInt(req.params.id);
+
+  try {
+    await prisma.pekerjaan.delete({
+      where: {
+        id: id,
+      },
+    });
+
+    return res.json({
+      status: 200,
+      message: "Data Berhasil Dihapus",
+    });
+  } catch (e) {
+    console.error(`Error deleting data: ${e}`);
+  }
+});
 
 module.exports = router;
