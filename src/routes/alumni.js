@@ -6,6 +6,7 @@ const { body, validationResult } = require("express-validator");
 const { verify } = require("crypto");
 const verifyToken = require("../middleware/token");
 const prisma = require("../utils/db");
+const user = require("../middleware/user");
 
 // Fungsi Menampilkan Data - BetterSqlite3
 router.get("/", verifyToken, async function (req, res) {
@@ -35,7 +36,7 @@ let alumniValidation = [
 ];
 
 // Fungsi Memasukkan Data - Non User Login
-router.post("/store", alumniValidation, async function (req, res) {
+router.post("/store", alumniValidation, user, async function (req, res) {
   const error = validationResult(req);
   if (!error.isEmpty()) {
     return res.status(422).json({
@@ -69,6 +70,7 @@ router.patch(
   "/update",
   alumniValidation,
   verifyToken,
+  user,
   async function (req, res) {
     const error = validationResult(req);
     if (!error.isEmpty()) {
@@ -97,7 +99,7 @@ router.patch(
     } catch (e) {
       console.error(`Error inserting data: ${e}`);
     }
-  }
+  },
 );
 
 module.exports = router;

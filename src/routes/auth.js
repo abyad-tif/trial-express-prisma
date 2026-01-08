@@ -3,7 +3,7 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const verifyToken = require("../middleware/token");
-const authorizeRole = require("../middleware/role");
+const admin = require("../middleware/role");
 
 const { body, validationResult } = require("express-validator");
 
@@ -20,7 +20,7 @@ router.post(
   "/register",
   userValidation,
   verifyToken,
-  authorizeRole,
+  admin,
   async function (req, res) {
     const error = validationResult(req);
     if (!error.isEmpty()) {
@@ -54,7 +54,7 @@ router.post(
     } catch (e) {
       console.error(`Error inserting data: ${e}`);
     }
-  }
+  },
 );
 
 router.post("/login", async function (req, res) {
@@ -74,7 +74,7 @@ router.post("/login", async function (req, res) {
 
     const passwordMatch = await bcrypt.compare(
       req.body.password,
-      user.password
+      user.password,
     );
     if (!passwordMatch) {
       return res.json({
@@ -91,7 +91,7 @@ router.post("/login", async function (req, res) {
       process.env.JWT_ACCESS_SECRET,
       {
         expiresIn: "30m",
-      }
+      },
     );
 
     res.cookie("authToken", token, {
