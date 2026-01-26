@@ -10,30 +10,26 @@ const prisma = require("../utils/db");
 // Fungsi Menampilkan Data - BetterSqlite3
 router.get("/", verifyToken, async function (req, res) {
   try {
-    const loker = await prisma.loker.findMany();
+    const news = await prisma.news.findMany();
 
     return res.json({
       status: 200,
-      message: "Data Loker",
-      data: loker,
+      message: "Data News",
+      data: news,
     });
   } catch (e) {
     console.error(`Error fetching data: ${e}`);
   }
 });
 
-let lokerValidation = [
+let newsValidation = [
   body("judul").notEmpty(),
+  body("author").notEmpty(),
   body("deskripsi").notEmpty(),
-  body("nama_perusahaan").notEmpty(),
-  body("industri").notEmpty(),
-  body("alamat").notEmpty(),
-  body("tgl_terbit").notEmpty(),
-  body("tgl_kadaluarsa").notEmpty(),
 ];
 
 // Fungsi Memasukkan Data - Non User Login
-router.post("/store", lokerValidation, async function (req, res) {
+router.post("/store", newsValidation, async function (req, res) {
   const error = validationResult(req);
   if (!error.isEmpty()) {
     return res.status(422).json({
@@ -42,15 +38,11 @@ router.post("/store", lokerValidation, async function (req, res) {
   }
 
   try {
-    await prisma.loker.create({
+    await prisma.news.create({
       data: {
         judul: req.body.judul,
+        author: req.body.author,
         deskripsi: req.body.deskripsi,
-        nama_perusahaan: req.body.nama_perusahaan,
-        industri: req.body.industri,
-        alamat: req.body.alamat,
-        tgl_terbit: req.body.tgl_terbit,
-        tgl_kadaluarsa: req.body.tgl_kadaluarsa,
       },
     });
 
@@ -63,7 +55,7 @@ router.post("/store", lokerValidation, async function (req, res) {
   }
 });
 
-router.post("/create", lokerValidation, verifyToken, async function (req, res) {
+router.post("/create", newsValidation, verifyToken, async function (req, res) {
   const error = validationResult(req);
   if (!error.isEmpty()) {
     return res.status(422).json({
@@ -72,16 +64,12 @@ router.post("/create", lokerValidation, verifyToken, async function (req, res) {
   }
 
   try {
-    await prisma.loker.create({
+    await prisma.news.create({
       // where: { alumni_email: req.user.email },
       data: {
         judul: req.body.judul,
+        author: req.body.author,
         deskripsi: req.body.deskripsi,
-        nama_perusahaan: req.body.nama_perusahaan,
-        industri: req.body.industri,
-        alamat: req.body.alamat,
-        tgl_terbit: req.body.tgl_terbit,
-        tgl_kadaluarsa: req.body.tgl_kadaluarsa,
       },
     });
 
@@ -96,7 +84,7 @@ router.post("/create", lokerValidation, verifyToken, async function (req, res) {
 
 router.patch(
   "/update/:id",
-  lokerValidation,
+  newsValidation,
   verifyToken,
   async function (req, res) {
     const error = validationResult(req);
@@ -109,18 +97,14 @@ router.patch(
     const id = parseInt(req.params.id);
 
     try {
-      await prisma.loker.update({
+      await prisma.news.update({
         where: {
           id: id,
         },
         data: {
           judul: req.body.judul,
+          author: req.body.author,
           deskripsi: req.body.deskripsi,
-          nama_perusahaan: req.body.nama_perusahaan,
-          industri: req.body.industri,
-          alamat: req.body.alamat,
-          tgl_terbit: req.body.tgl_terbit,
-          tgl_kadaluarsa: req.body.tgl_kadaluarsa,
         },
       });
 
@@ -134,11 +118,11 @@ router.patch(
   },
 );
 
-router.delete("/loker/:id", verifyToken, async function (req, res) {
+router.delete("/news/:id", verifyToken, async function (req, res) {
   const id = parseInt(req.params.id);
 
   try {
-    await prisma.loker.delete({
+    await prisma.news.delete({
       where: {
         id: id,
       },

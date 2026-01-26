@@ -10,52 +10,57 @@ const { body, validationResult } = require("express-validator");
 const prisma = require("../utils/db");
 
 let userValidation = [
-  body("nim").notEmpty(),
-  // body("name").notEmpty(),
-  // body("password").notEmpty(),
+  body("name").notEmpty(),
+  body("nim")
+    .notEmpty()
+    .custom((value) => {
+      if (!value.startsWith("D121")) {
+        throw new Error("NIM wajib diisi sesuai ketentuan");
+      }
+      return true;
+    }),
+  body("no_wa").notEmpty(),
+  body("email").isEmail(),
+  body("status").notEmpty(),
+  body("password").notEmpty(),
 ];
 
 // Fungsi Register Data = BetterSqlite3
-router.post(
-  "/register",
-  userValidation,
-  verifyToken,
-  admin,
-  async function (req, res) {
-    const error = validationResult(req);
-    if (!error.isEmpty()) {
-      return res.status(422).json({
-        errors: error.array(),
-      });
-    }
+router.post("/register", userValidation, async function (req, res) {
+  const error = validationResult(req);
+  if (!error.isEmpty()) {
+    return res.status(422).json({
+      errors: error.array(),
+    });
+  }
 
-    try {
-      const hashedPassword = await bcrypt.hash(req.body.nim, 10);
+  try {
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
-      const date = new Date();
+    const date = new Date();
 
-      await prisma.user.create({
-        data: {
-          nim: req.body.nim,
-          password: hashedPassword,
-          alumni: {
-            create: {},
-          },
-          // pendidikan: {
-          //   create: {},
-          // },
+    await prisma.user.create({
+      data: {
+        name: req.body.name,
+        nim: req.body.nim,
+        no_wa: req.body.no_wa,
+        email: req.body.email,
+        status: req.body.status,
+        password: hashedPassword,
+        alumni: {
+          create: {},
         },
-      });
+      },
+    });
 
-      return res.json({
-        status: 201,
-        message: "Data berhasil ditambahkan",
-      });
-    } catch (e) {
-      console.error(`Error inserting data: ${e}`);
-    }
-  },
-);
+    return res.json({
+      status: 201,
+      message: "Data berhasil ditambahkan",
+    });
+  } catch (e) {
+    console.error(`Error inserting data: ${e}`);
+  }
+});
 
 router.post("/login", async function (req, res) {
   try {

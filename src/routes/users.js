@@ -28,8 +28,18 @@ router.get("/", verifyToken, async function (req, res) {
 });
 
 let userValidation = [
-  body("email").isEmail(),
   body("name").notEmpty(),
+  body("nim")
+    .notEmpty()
+    .custom((value) => {
+      if (!value.startsWith("D121")) {
+        throw new Error("NIM wajib diisi sesuai ketentuan");
+      }
+      return true;
+    }),
+  body("no_wa").notEmpty(),
+  body("email").isEmail(),
+  body("status").notEmpty(),
   body("password").notEmpty(),
 ];
 

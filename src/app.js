@@ -4,6 +4,7 @@ const userAlumniRouter = require("./routes/alumni");
 const userPendidikanRouter = require("./routes/pendidikan");
 const userPekerjaanRouter = require("./routes/pekerjaan");
 const userLokerRouter = require("./routes/loker");
+const userNewsRouter = require("./routes/news");
 const auth = require("./routes/auth");
 const admin = require("./routes/admin");
 const verifyToken = require("./middleware/token");
@@ -29,7 +30,7 @@ app.use(
     credentials: true,
     methods: ["GET", "POST", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
-  })
+  }),
 );
 // app.use(verifyToken);
 app.use("/api/auth", auth);
@@ -39,6 +40,7 @@ app.use("/api/getDataPendidikan", userPendidikanRouter);
 app.use("/api/getDataPekerjaan", userPekerjaanRouter);
 app.use("/api/getDataLoker", userLokerRouter);
 app.use("/api/admin", admin);
+app.use("/api/getDataNews", userNewsRouter);
 
 app.listen(PORT, () => {
   console.log(`Server berjalan di port ${PORT}`);

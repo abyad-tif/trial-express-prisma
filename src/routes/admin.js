@@ -11,26 +11,23 @@ const { Role } = require("../generated/prisma");
 const prisma = require("../utils/db");
 
 // Fungsi Menampilkan Semua Data
-router.get("/", verifyToken, admin, async function (req, res) {
+router.get("/getDataAllUser", verifyToken, admin, async function (req, res) {
   try {
-    // const user = await prisma.user.findMany();
-    // const role = USER;
-    const alumni = await prisma.alumni.findMany({
+    const alumni = await prisma.user.findMany({
       where: {
-        user: {
-          role: Role["USER"],
-        },
+        role: Role["USER"],
+      },
+      select: {
+        alumni: true,
+        pendidikan: true,
+        pekerjaan: true,
       },
     });
-    const pendidikan = await prisma.pendidikan.findMany();
-    const pekerjaan = await prisma.pekerjaan.findMany();
 
     return res.json({
       status: 200,
       message: "Semua Data",
       alumni: alumni,
-      pendidikan: pendidikan,
-      pekerjaan: pekerjaan,
     });
   } catch (e) {
     console.error(`Error fetching data: ${e}`);
@@ -44,37 +41,48 @@ router.post(
   admin,
   async function (req, res) {
     try {
-      const id = await prisma.user.findUnique({
+      const name = await prisma.user.findUnique({
         where: {
           nim: req.body.nim,
         },
         select: {
-          id: true,
+          alumni: {
+            select: {
+              name: true,
+            },
+          },
         },
       });
-      const name = await prisma.alumni.findUnique({
-        where: id,
+      const alumni = await prisma.user.findUnique({
+        where: {
+          nim: req.body.nim,
+        },
         select: {
-          name: true,
+          alumni: true,
         },
       });
-      const alumni = await prisma.alumni.findUnique({
-        where: id,
+      const pendidikan = await prisma.user.findMany({
+        where: {
+          nim: req.body.nim,
+        },
+        select: {
+          pendidikan: true,
+        },
       });
-      const pendidikan = await prisma.pendidikan.findMany({
-        where: id,
-      });
-      const pekerjaan = await prisma.pekerjaan.findMany({
-        where: id,
+      const pekerjaan = await prisma.user.findMany({
+        where: {
+          nim: req.body.nim,
+        },
+        select: {
+          pekerjaan: true,
+        },
       });
 
       return res.json({
         status: 200,
         message: `Semua Data`,
         user: name,
-        alumni: alumni,
-        pendidikan: pendidikan,
-        pekerjaan: pekerjaan,
+        data: [alumni, pendidikan, pekerjaan],
       });
     } catch (e) {
       console.error(`Error fetching data: ${e}`);
